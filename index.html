@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Obrigado – Full Sales System</title>
+  <link rel="icon" type="image/png" href="I%CC%81CONE---Full-Sales.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── Reset & Base ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red:        #FE063B;
+      --red-dark:   #c90030;
+      --red-glow:   rgba(254, 6, 59, 0.15);
+      --bg-blue:    #0d1a36;
+      --card:       #0d1a36;
+      --border:     rgba(255, 255, 255, 0.14);
+      --border-red: rgba(254, 6, 59, 0.55);
+      --text:       #ffffff;
+      --muted:      #b8c0d4;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-blue) url('background%20fss.png') center center / cover no-repeat fixed;
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ─── Navbar ────────────────────────────────────────────── */
+    .navbar {
+      width: 100%;
+      background: var(--bg-blue);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .navbar__inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+    }
+    .navbar__logo { height: 36px; }
+
+    /* ─── Page wrapper ──────────────────────────────────────── */
+    .page {
+      width: 100%;
+      max-width: 680px;
+      padding: 48px 24px 80px;
+    }
+
+    /* ─── Hero text ─────────────────────────────────────────── */
+    .hero {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .hero__title {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(1.55rem, 4vw, 2.1rem);
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.25;
+      margin-bottom: 14px;
+    }
+    .hero__title span { color: var(--red); }
+    .hero__sub {
+      font-size: clamp(0.9rem, 2vw, 1rem);
+      color: var(--muted);
+      line-height: 1.65;
+      max-width: 580px;
+      margin: 0 auto;
+    }
+
+    /* ─── Quiz card ─────────────────────────────────────────── */
+    .quiz-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.35);
+    }
+    .quiz-card__bar {
+      height: 4px;
+      background: rgba(255,255,255,0.10);
+      position: relative;
+    }
+    .quiz-card__bar-fill {
+      height: 100%;
+      background: var(--red);
+      border-radius: 0 4px 4px 0;
+      transition: width 0.4s cubic-bezier(.4,0,.2,1);
+    }
+    .quiz-card__header {
+      padding: 24px 32px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .quiz-step-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .quiz-step-counter {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .quiz-step-counter em {
+      color: var(--red);
+      font-style: normal;
+      font-weight: 700;
+    }
+
+    /* ─── Steps container ───────────────────────────────────── */
+    .steps-wrapper {
+      padding: 28px 32px 32px;
+      overflow: hidden;
+    }
+    .step {
+      display: none;
+      animation: fadeIn 0.35s ease;
+    }
+    .step.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateX(18px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes fadeInBack {
+      from { opacity: 0; transform: translateX(-18px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    .step.anim-back { animation: fadeInBack 0.35s ease; }
+
+    .step__question {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 22px;
+      line-height: 1.4;
+    }
+
+    /* ─── Options ───────────────────────────────────────────── */
+    .options { display: flex; flex-direction: column; gap: 10px; }
+
+    .option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 11px;
+      cursor: pointer;
+      transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
+      user-select: none;
+      background: rgba(255,255,255,0.04);
+    }
+    .option:hover {
+      border-color: var(--border-red);
+      background: var(--red-glow);
+    }
+    .option input[type="radio"],
+    .option input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.35);
+      border-radius: 50%;
+      flex-shrink: 0;
+      transition: border-color 0.18s, background 0.18s;
+      position: relative;
+      cursor: pointer;
+    }
+    .option input[type="checkbox"] { border-radius: 5px; }
+    .option input[type="radio"]:checked,
+    .option input[type="checkbox"]:checked {
+      border-color: var(--red);
+      background: var(--red);
+    }
+    .option input[type="radio"]:checked::after {
+      content: '';
+      display: block;
+      width: 6px; height: 6px;
+      background: #fff;
+      border-radius: 50%;
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .option input[type="checkbox"]:checked::after {
+      content: '';
+      display: block;
+      width: 10px; height: 7px;
+      border-left: 2px solid #fff;
+      border-bottom: 2px solid #fff;
+      position: absolute;
+      top: 45%; left: 50%;
+      transform: translate(-50%, -50%) rotate(-45deg);
+    }
+    .option.selected {
+      border-color: var(--border-red);
+      background: var(--red-glow);
+      box-shadow: 0 0 0 3px rgba(254,6,59,0.15);
+    }
+    .option__label {
+      font-size: 0.93rem;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    /* ─── Scale (Q5) ────────────────────────────────────────── */
+    .scale-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .scale-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-weight: 500;
+      padding: 0 2px;
+    }
+    .scale-options {
+      display: flex;
+      gap: 10px;
+    }
+    .scale-option {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+    .scale-option input[type="radio"] { display: none; }
+    .scale-btn {
+      width: 100%;
+      aspect-ratio: 1;
+      max-width: 70px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Sora', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--muted);
+      transition: border-color 0.18s, background 0.18s, color 0.18s, box-shadow 0.18s;
+    }
+    .scale-option:hover .scale-btn,
+    .scale-option input:checked ~ .scale-btn {
+      border-color: var(--red);
+      background: var(--red-glow);
+      color: #fff;
+      box-shadow: 0 0 0 3px rgba(254,6,59,0.15);
+    }
+
+    /* ─── Navigation buttons ────────────────────────────────── */
+    .quiz-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 32px 28px;
+      gap: 12px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 13px 28px;
+      border-radius: 10px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.93rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+      border: none;
+      text-decoration: none;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn--primary {
+      background: var(--red);
+      color: #fff;
+      box-shadow: 0 4px 18px rgba(254,6,59,0.28);
+    }
+    .btn--primary:hover {
+      background: var(--red-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(254,6,59,0.35);
+    }
+    .btn--ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1.5px solid var(--border);
+    }
+    .btn--ghost:hover {
+      border-color: rgba(255,255,255,0.4);
+      color: var(--text);
+    }
+    .btn--hidden { visibility: hidden; pointer-events: none; }
+
+    /* ─── Success screen ────────────────────────────────────── */
+    .success {
+      display: none;
+      text-align: center;
+      padding: 48px 32px;
+      animation: fadeIn 0.5s ease;
+    }
+    .success.active { display: block; }
+    .success__icon {
+      width: 64px; height: 64px;
+      background: var(--red-glow);
+      border: 2px solid var(--border-red);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+    }
+    .success__icon svg { width: 28px; height: 28px; color: var(--red); }
+    .success__title {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(1.2rem, 3vw, 1.5rem);
+      font-weight: 800;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+    .success__sub {
+      font-size: 0.95rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ─── Footer ────────────────────────────────────────────── */
+    .footer {
+      width: 100%;
+      text-align: center;
+      padding: 32px 24px;
+      font-size: 0.78rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      margin-top: auto;
+    }
+
+    /* ─── Responsive ────────────────────────────────────────── */
+    @media (max-width: 520px) {
+      .steps-wrapper,
+      .quiz-card__header,
+      .quiz-nav { padding-left: 20px; padding-right: 20px; }
+      .scale-btn { font-size: 1rem; border-radius: 9px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar" aria-label="Navegação principal">
+    <div class="navbar__inner">
+      <img
+        class="navbar__logo"
+        src="LOGO-(Branco)---Full-Sales.png"
+        alt="Full Sales System"
+        onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';"
+      />
+      <span style="display:none; font-family:'Sora',sans-serif; font-weight:800; font-size:1.05rem; color:#ffffff;">
+        Full Sales <span style="color:#FE063B;">System</span>
+      </span>
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <main class="page">
+
+    <!-- Hero -->
+    <header class="hero">
+      <h1 class="hero__title">Obrigado pelo <span>interesse!</span></h1>
+      <p class="hero__sub">
+        Nosso time comercial entrará em contato em breve.<br />
+        Antes de agendar o nosso bate-papo, por favor responda às perguntas abaixo.
+        Isso nos ajuda a entender seu cenário e agiliza o contato do nosso time comercial.
+      </p>
+    </header>
+
+    <!-- Quiz card -->
+    <div class="quiz-card" id="quiz-card">
+
+      <!-- Progress bar -->
+      <div class="quiz-card__bar">
+        <div class="quiz-card__bar-fill" id="progress-bar" style="width: 20%"></div>
+      </div>
+
+      <!-- Header -->
+      <div class="quiz-card__header">
+        <span class="quiz-step-label" id="step-label">Pergunta 1 de 5</span>
+        <span class="quiz-step-counter"><em id="step-num">1</em>/5</span>
+      </div>
+
+      <!-- ── Steps ── -->
+      <form id="quiz-form" novalidate>
+
+        <!-- Step 1 -->
+        <div class="steps-wrapper">
+          <div class="step active" id="step-1">
+            <p class="step__question">Como a sua empresa vende hoje?</p>
+            <div class="options" role="radiogroup">
+              <label class="option">
+                <input type="radio" name="q1" value="equipe-call" />
+                <span class="option__label">Tenho equipe comercial que fecha por call/meeting.</span>
+              </label>
+              <label class="option">
+                <input type="radio" name="q1" value="eu-call" />
+                <span class="option__label">Eu mesmo fecho por call/meeting.</span>
+              </label>
+              <label class="option">
+                <input type="radio" name="q1" value="chat-email" />
+                <span class="option__label">Vendo mais por chat/e-mail.</span>
+              </label>
+              <label class="option">
+                <input type="radio" name="q1" value="whatsapp" />
+                <span class="option__label">Utilizo o WhatsApp para fechar minhas vendas.</span>
+              </label>
+              <label class="option">
+                <input type="radio" name="q1" value="fisico" />
+                <span class="option__label">Tenho negócio físico e vendo pessoalmente.</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="steps-wrapper" style="display:none" id="wrapper-2">
+          <div class="step" id="step-2">
+            <p class="step__question">Quais são os principais obstáculos que você enfrenta nas vendas do seu negócio?</p>
+            <div class="options" role="group">
+              <label class="option">
+                <input type="checkbox" name="q2" value="conversao-treinamento" />
+                <span class="option__label">Conversão e Treinamento dos Vendedores</span>
+              </label>
+              <label class="option">
+                <input type="checkbox" name="q2" value="gestao-numeros" />
+                <span class="option__label">Gestão dos números do negócio</span>
+              </label>
+              <label class="option">
+                <input type="checkbox" name="q2" value="baixo-reunioes" />
+                <span class="option__label">Baixo volume de reuniões diárias</span>
+              </label>
+              <label class="option">
+                <input type="checkbox" name="q2" value="falta-resposta" />
+                <span class="option__label">Falta de resposta dos leads</span>
+              </label>
+              <label class="option" id="todos-acima-opt">
+                <input type="checkbox" name="q2" value="todos" id="todos-acima" />
+                <span class="option__label">Todos acima</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="steps-wrapper" style="display:none" id="wrapper-3">
+          <div class="step" id="step-3">
+            <p class="step__question">Antes de apresentar, você faz perguntas para entender a necessidade/urgência do cliente?</p>
+            <div class="options" role="radiogroup">
+              <label class="option">
+                <input type="radio" name="q3" value="sempre" />
+                <span class="option__label">Sempre</span>
+              </label>
+              <label class="option">
+                <input type="radio" name="q3" value="as-vezes" />
+                <span class="option__label">Às vezes</span>
+              </label>
+              <label class="option">
+                <input type="radio" name="q3" value="quase-nunca" />
+                <span class="option__label">Quase nunca</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="steps-wrapper" style="display:none" id="wrapper-4">
+          <div class="step" id="step-4">
+            <p class="step__question">Qual é o número de colaboradores da sua empresa?</p>
+            <div class="options" role="radiogroup">
+              <label class="option">
+                <input type="radio" name="q4" value="apenas-eu" />
+                <span class="option__label">Apenas eu</span>
+              </label>
+              <label class="option">
+                <input type="radio" name="q4" value="1-5" />
+                <span class="option__label">De 1 a 5</span>
+              </label>
+              <label class="option">
+                <input type="radio" name="q4" value="5-10" />
+                <span class="option__label">De 5 a 10</span>
+              </label>
+              <label class="option">
+                <input type="radio" name="q4" value="10-20" />
+                <span class="option__label">De 10 a 20</span>
+              </label>
+              <label class="option">
+                <input type="radio" name="q4" value="20-50" />
+                <span class="option__label">De 20 a 50</span>
+              </label>
+              <label class="option">
+                <input type="radio" name="q4" value="acima-50" />
+                <span class="option__label">Acima de 50</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="steps-wrapper" style="display:none" id="wrapper-5">
+          <div class="step" id="step-5">
+            <p class="step__question">Na escala de 1 a 5, o quanto você está disposto hoje a organizar e profissionalizar o comercial da sua empresa para o crescimento sólido e acelerado?</p>
+            <div class="scale-wrapper">
+              <div class="scale-labels">
+                <span>Pouco disposto</span>
+                <span>Muito disposto</span>
+              </div>
+              <div class="scale-options" role="radiogroup">
+                <label class="scale-option">
+                  <input type="radio" name="q5" value="1" />
+                  <div class="scale-btn">1</div>
+                </label>
+                <label class="scale-option">
+                  <input type="radio" name="q5" value="2" />
+                  <div class="scale-btn">2</div>
+                </label>
+                <label class="scale-option">
+                  <input type="radio" name="q5" value="3" />
+                  <div class="scale-btn">3</div>
+                </label>
+                <label class="scale-option">
+                  <input type="radio" name="q5" value="4" />
+                  <div class="scale-btn">4</div>
+                </label>
+                <label class="scale-option">
+                  <input type="radio" name="q5" value="5" />
+                  <div class="scale-btn">5</div>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Success screen -->
+        <div class="success" id="success-screen">
+          <div class="success__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+          <h2 class="success__title">Respostas enviadas!</h2>
+          <p class="success__sub">
+            Obrigado por responder.<br />
+            Nosso time comercial está revisando suas informações<br />e entrará em contato em breve.
+          </p>
+        </div>
+
+      </form>
+
+      <!-- Navigation -->
+      <div class="quiz-nav" id="quiz-nav">
+        <button type="button" class="btn btn--ghost btn--hidden" id="btn-back">
+          ← Voltar
+        </button>
+        <!-- shown only on step 2 (checkboxes) -->
+        <button type="button" class="btn btn--primary btn--hidden" id="btn-confirm">
+          Confirmar seleção →
+        </button>
+        <!-- shown after step 5 is answered -->
+        <button type="button" class="btn btn--primary btn--hidden" id="btn-submit">
+          Enviar respostas →
+        </button>
+      </div>
+
+    </div><!-- /quiz-card -->
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    © 2025 Full Sales System. Todos os direitos reservados.
+  </footer>
+
+  <script>
+    (function () {
+      const TOTAL = 5;
+      let current = 1;
+
+      const progressBar   = document.getElementById('progress-bar');
+      const stepLabel     = document.getElementById('step-label');
+      const stepNum       = document.getElementById('step-num');
+      const btnBack       = document.getElementById('btn-back');
+      const btnConfirm    = document.getElementById('btn-confirm');
+      const btnSubmit     = document.getElementById('btn-submit');
+      const quizNav       = document.getElementById('quiz-nav');
+      const successScreen = document.getElementById('success-screen');
+
+      /* ── Show step ── */
+      function showStep(num, back) {
+        for (let i = 1; i <= TOTAL; i++) {
+          const wrapper = document.getElementById('wrapper-' + i) || (i === 1 ? document.querySelector('.steps-wrapper') : null);
+          const step    = document.getElementById('step-' + i);
+          if (!wrapper || !step) continue;
+          if (i === num) {
+            wrapper.style.display = '';
+            step.classList.add('active');
+            step.classList.toggle('anim-back', !!back);
+            void step.offsetWidth; /* re-trigger animation */
+          } else {
+            wrapper.style.display = 'none';
+            step.classList.remove('active');
+          }
+        }
+      }
+
+      /* ── Update UI ── */
+      function updateUI() {
+        stepLabel.textContent       = 'Pergunta ' + current + ' de ' + TOTAL;
+        stepNum.textContent         = current;
+        progressBar.style.width     = ((current / TOTAL) * 100) + '%';
+        btnBack.classList.toggle('btn--hidden', current === 1);
+        /* confirm button only visible on step 2 (checkboxes) */
+        btnConfirm.classList.toggle('btn--hidden', current !== 2);
+        /* hide submit button whenever navigating */
+        btnSubmit.classList.add('btn--hidden');
+      }
+
+      /* ── Advance / submit ── */
+      function advance() {
+        if (current < TOTAL) {
+          current++;
+          showStep(current, false);
+          updateUI();
+        } else {
+          submitQuiz();
+        }
+      }
+
+      /* ── Submit ── */
+      function submitQuiz() {
+        btnSubmit.disabled = true;
+        btnSubmit.textContent = 'Enviando…';
+
+        var q1 = document.querySelector('input[name="q1"]:checked');
+        var q2 = Array.from(document.querySelectorAll('input[name="q2"]:checked')).map(function (cb) { return cb.value; });
+        var q3 = document.querySelector('input[name="q3"]:checked');
+        var q4 = document.querySelector('input[name="q4"]:checked');
+        var q5 = document.querySelector('input[name="q5"]:checked');
+
+        fetch('https://responsefss.fullsalessystem.com.br/webhook/DESENVRESPS', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            q1: q1 ? q1.value : null,
+            q2: q2,
+            q3: q3 ? q3.value : null,
+            q4: q4 ? q4.value : null,
+            q5: q5 ? q5.value : null
+          })
+        }).finally(function () {
+          window.location.href = 'https://fap01-calendly-semi.fullsalessystem.com/';
+        });
+      }
+
+      btnSubmit.addEventListener('click', submitQuiz);
+
+      /* ── Radio: auto-advance after short delay ── */
+      document.querySelectorAll('input[type="radio"]').forEach(function (radio) {
+        radio.addEventListener('change', function () {
+          /* highlight selected option */
+          document.querySelectorAll('input[name="' + radio.name + '"]').forEach(function (r) {
+            r.closest('.option, .scale-option').classList.remove('selected');
+          });
+          radio.closest('.option, .scale-option').classList.add('selected');
+
+          /* auto-advance (on last step, show submit button instead) */
+          setTimeout(function () {
+            if (current === TOTAL) {
+              btnSubmit.classList.remove('btn--hidden');
+            } else {
+              advance();
+            }
+          }, 380);
+        });
+      });
+
+      /* ── Checkboxes: highlight + show/hide confirm button ── */
+      document.querySelectorAll('input[type="checkbox"]').forEach(function (cb) {
+        cb.addEventListener('change', function () {
+          /* "Todos acima" mutual exclusion */
+          if (cb.value === 'todos' && cb.checked) {
+            document.querySelectorAll('input[name="q2"]').forEach(function (other) {
+              if (other.value !== 'todos') {
+                other.checked = false;
+                other.closest('.option').classList.remove('selected');
+              }
+            });
+          } else if (cb.value !== 'todos' && cb.checked) {
+            const todos = document.getElementById('todos-acima');
+            todos.checked = false;
+            todos.closest('.option').classList.remove('selected');
+          }
+          cb.closest('.option').classList.toggle('selected', cb.checked);
+        });
+      });
+
+      /* ── Confirm button (step 2) ── */
+      btnConfirm.addEventListener('click', function () {
+        if (!document.querySelector('input[name="q2"]:checked')) {
+          /* shake if nothing selected */
+          const card = document.getElementById('quiz-card');
+          card.style.animation = 'none';
+          void card.offsetWidth;
+          card.style.animation = 'shake 0.4s ease';
+          return;
+        }
+        advance();
+      });
+
+      /* ── Back ── */
+      btnBack.addEventListener('click', function () {
+        if (current > 1) {
+          current--;
+          showStep(current, true);
+          updateUI();
+        }
+      });
+
+      /* ── Shake keyframe ── */
+      const style = document.createElement('style');
+      style.textContent = '@keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-6px)} 40%,80%{transform:translateX(6px)} }';
+      document.head.appendChild(style);
+
+      /* init */
+      updateUI();
+    })();
+  </script>
+
+</body>
+</html>
