@@ -91,13 +91,14 @@
       text-align: center;
       margin-bottom: 40px;
     }
-    .hero__pretitle {
+    .hero__eyebrow {
       font-family: 'Inter', sans-serif;
-      font-size: clamp(0.8rem, 2vw, 0.95rem);
-      font-weight: 400;
+      font-size: clamp(0.72rem, 1.6vw, 0.82rem);
+      font-weight: 600;
+      letter-spacing: 0.12em;
       color: var(--muted);
-      margin-bottom: 10px;
-      letter-spacing: 0.01em;
+      text-transform: uppercase;
+      margin: 0 0 12px;
     }
     .hero__title {
       font-family: 'Sora', sans-serif;
@@ -106,9 +107,17 @@
       color: var(--text);
       line-height: 1.2;
       letter-spacing: -0.015em;
-      margin-bottom: 0;
+      margin: 0 0 12px;
     }
     .hero__title span { color: var(--red); font-weight: 800; }
+    .hero__sub {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(0.95rem, 2vw, 1.1rem);
+      font-weight: 400;
+      color: var(--muted);
+      line-height: 1.4;
+      margin: 0;
+    }
 
     /* ─── Quiz card ─────────────────────────────────────────── */
     .quiz-card {
@@ -427,8 +436,9 @@
 
     <!-- Hero -->
     <header class="hero">
-      <p class="hero__pretitle">antes de receber o seu Playbook...</p>
-      <h1 class="hero__title">descubra o <span>gargalo comercial da sua empresa</span> em 30 segundos através do teste:</h1>
+      <p class="hero__eyebrow">ANTES DE RECEBER O SEU PLAYBOOK...</p>
+      <h1 class="hero__title">Descubra o <span>gargalo comercial da sua empresa</span></h1>
+      <p class="hero__sub">O teste leva 30 segundos</p>
     </header>
 
     <!-- Quiz card -->
