@@ -665,7 +665,7 @@
       /* ── Submit ── */
       function submitQuiz() {
         btnSubmit.disabled = true;
-        btnSubmit.textContent = 'Enviando…';
+        btnSubmit.textContent = 'Enviado ✓';
 
         var q1 = document.querySelector('input[name="q1"]:checked');
         var q2 = Array.from(document.querySelectorAll('input[name="q2"]:checked')).map(function (cb) { return cb.value; });
@@ -673,18 +673,13 @@
         var q4 = document.querySelector('input[name="q4"]:checked');
         var q5 = document.querySelector('input[name="q5"]:checked');
 
-        fetch('https://responsefss.fullsalessystem.com.br/webhook/DESENVRESPS', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            q1: q1 ? q1.value : null,
-            q2: q2,
-            q3: q3 ? q3.value : null,
-            q4: q4 ? q4.value : null,
-            q5: q5 ? q5.value : null
-          })
-        }).finally(function () {
-          window.location.href = 'https://fap01-calendly-semi.fullsalessystem.com/';
+        // TODO: integrar webhook novo + redirect condicional por classificação
+        console.log('[QUIZ SUBMIT - awaiting integration]', {
+          q1: q1 ? q1.value : null,
+          q2: q2,
+          q3: q3 ? q3.value : null,
+          q4: q4 ? q4.value : null,
+          q5: q5 ? q5.value : null
         });
       }
 
