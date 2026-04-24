@@ -55,19 +55,29 @@
     }
     .navbar__logo { height: 36px; }
 
-    /* ─── Tarja de progresso ────────────────────────────────── */
+    /* ─── Tarja de progresso (pill) ─────────────────────────── */
     .tarja {
-      background: var(--red);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: fit-content;
+      max-width: calc(100% - 32px);
+      margin: 18px auto 0;
+      background: rgba(90, 20, 40, 0.85);
+      border: 1px solid rgba(254, 6, 59, 0.25);
+      border-radius: 999px;
       color: #ffffff;
-      text-align: center;
-      padding: 10px 16px;
+      padding: 10px 20px;
       font-family: 'Inter', sans-serif;
-      font-weight: 600;
-      font-size: clamp(0.8rem, 2vw, 0.95rem);
+      font-weight: 500;
+      font-size: clamp(0.78rem, 1.8vw, 0.88rem);
       line-height: 1.4;
       letter-spacing: 0.01em;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      text-align: center;
     }
-    .tarja strong { font-weight: 800; }
+    .tarja strong { font-weight: 700; }
 
     /* ─── Page wrapper ──────────────────────────────────────── */
     .page {
@@ -91,13 +101,14 @@
     }
     .hero__title {
       font-family: 'Sora', sans-serif;
-      font-size: clamp(1.55rem, 4vw, 2.1rem);
-      font-weight: 800;
+      font-size: clamp(1.6rem, 3.6vw + 0.4rem, 2.4rem);
+      font-weight: 700;
       color: var(--text);
-      line-height: 1.25;
-      margin-bottom: 14px;
+      line-height: 1.2;
+      letter-spacing: -0.015em;
+      margin-bottom: 0;
     }
-    .hero__title span { color: var(--red); }
+    .hero__title span { color: var(--red); font-weight: 800; }
 
     /* ─── Quiz card ─────────────────────────────────────────── */
     .quiz-card {
