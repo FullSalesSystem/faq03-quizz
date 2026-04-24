@@ -55,6 +55,20 @@
     }
     .navbar__logo { height: 36px; }
 
+    /* ─── Tarja de progresso ────────────────────────────────── */
+    .tarja {
+      background: var(--red);
+      color: #ffffff;
+      text-align: center;
+      padding: 10px 16px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: clamp(0.8rem, 2vw, 0.95rem);
+      line-height: 1.4;
+      letter-spacing: 0.01em;
+    }
+    .tarja strong { font-weight: 800; }
+
     /* ─── Page wrapper ──────────────────────────────────────── */
     .page {
       width: 100%;
@@ -66,6 +80,14 @@
     .hero {
       text-align: center;
       margin-bottom: 40px;
+    }
+    .hero__pretitle {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(0.8rem, 2vw, 0.95rem);
+      font-weight: 400;
+      color: var(--muted);
+      margin-bottom: 10px;
+      letter-spacing: 0.01em;
     }
     .hero__title {
       font-family: 'Sora', sans-serif;
@@ -391,12 +413,18 @@
     </div>
   </nav>
 
+  <!-- Tarja de progresso -->
+  <div class="tarja" role="status">
+    <strong>PASSO 2 DE 4:</strong> Parabéns por ter garantido o Playbook Comercial...
+  </div>
+
   <!-- Main content -->
   <main class="page">
 
     <!-- Hero -->
     <header class="hero">
-      <h1 class="hero__title">Obrigado pelo <span>interesse!</span></h1>
+      <p class="hero__pretitle">antes de receber o seu Playbook...</p>
+      <h1 class="hero__title">descubra o <span>gargalo comercial da sua empresa</span> em 30 segundos através do teste:</h1>
       <p class="hero__sub">
         Nosso time comercial entrará em contato em breve.<br />
         Antes de agendar o nosso bate-papo, por favor responda às perguntas abaixo.
