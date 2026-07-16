@@ -2,6 +2,23 @@
   const TOTAL = 5;
   let current = 1;
 
+  /* ── dataLayer (GTM-MK7SRXJ9) ──────────────────────────────
+     Eventos p/ mapear no GTM: pb_quiz_view, pb_quiz_step, pb_quiz_complete
+     Params comuns em todo push: variante ('qualificado'|'semi'), funil ('playbook') */
+  var PB_VARIANTE = 'qualificado';
+  function dl(evt, params) {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push(Object.assign({ event: evt, variante: PB_VARIANTE, funil: 'playbook' }, params || {}));
+  }
+  var PB_QUESTIONS = { 1: 'como-vende', 2: 'obstaculos', 3: 'qualificacao-perguntas', 4: 'colaboradores', 5: 'disposicao' };
+  function pbAnswerOf(step) {
+    if (step === 2) {
+      return Array.from(document.querySelectorAll('input[name="q2"]:checked')).map(function (cb) { return cb.value; }).join(',');
+    }
+    var el = document.querySelector('input[name="q' + step + '"]:checked');
+    return el ? el.value : '';
+  }
+
   const progressBar   = document.getElementById('progress-bar');
   const stepLabel     = document.getElementById('step-label');
   const stepNum       = document.getElementById('step-num');
@@ -45,6 +62,11 @@
   function advance() {
     if (current < TOTAL) {
       current++;
+      dl('pb_quiz_step', {
+        step: current,
+        question: PB_QUESTIONS[current],
+        answer_prev: pbAnswerOf(current - 1)
+      });
       showStep(current, false);
       updateUI();
     } else {
@@ -78,9 +100,21 @@
     var q3El = document.querySelector('input[name="q3"]:checked');
     var q4El = document.querySelector('input[name="q4"]:checked');
     var q5El = document.querySelector('input[name="q5"]:checked');
+    var submissionId = newSubmissionId();
+
+    /* pb_quiz_complete ANTES do fetch/redirect (delay de 250ms no .finally cobre o GTM) */
+    dl('pb_quiz_complete', {
+      q1: q1El ? q1El.value : '',
+      q2: q2.join(','),
+      q3: q3El ? q3El.value : '',
+      q4: q4El ? q4El.value : '',
+      q5: q5El ? q5El.value : '',
+      resultado: q2.join(','),
+      submission_id: submissionId
+    });
 
     var payload = {
-      submission_id: newSubmissionId(),
+      submission_id: submissionId,
       submitted_at: new Date().toISOString(),
       page: window.location.href,
       email: getQueryParam('email'),
@@ -183,4 +217,5 @@
 
   /* init */
   updateUI();
+  dl('pb_quiz_view', { step: 1, question: PB_QUESTIONS[1] });
 })();
