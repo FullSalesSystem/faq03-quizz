@@ -3,6 +3,12 @@ const MAX_REQUESTS_PER_WINDOW = 10;
 const ipBucket = new Map();
 const LEAD_SOURCE = 'FAQ03 - Playbook Quiz';
 
+/* Origens liberadas para POST cross-origin (o quiz SEMI não tem backend
+   próprio e envia as respostas para este endpoint). */
+const ALLOWED_ORIGINS = new Set([
+  'https://playbook-quizz-semi.fullsalessystem.com',
+]);
+
 const ALLOWED_Q1 = new Set([
   'equipe-call',
   'eu-call',
@@ -67,6 +73,32 @@ function json(res, status, data) {
   res.statusCode = status;
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.end(JSON.stringify(data));
+}
+
+function applyCors(req, res) {
+  res.setHeader('Vary', 'Origin');
+  const origin = req.headers.origin;
+  if (typeof origin === 'string' && ALLOWED_ORIGINS.has(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Max-Age', '86400');
+  }
+}
+
+function parseBody(req) {
+  /* Vercel só parseia application/json. O quiz SEMI envia o JSON com
+     Content-Type text/plain (simple request — sem preflight, mais confiável
+     com keepalive durante o unload), então o body chega como string. */
+  const body = req.body;
+  if (typeof body === 'string') {
+    try {
+      return JSON.parse(body);
+    } catch (err) {
+      return {};
+    }
+  }
+  return body || {};
 }
 
 function getClientIp(req) {
@@ -220,6 +252,11 @@ async function addContactNote(ghlBaseUrl, pitToken, contactId, body) {
 }
 
 async function handler(req, res) {
+  applyCors(req, res);
+  if (req.method === 'OPTIONS') {
+    res.statusCode = 204;
+    return res.end();
+  }
   if (req.method !== 'POST') return json(res, 405, { error: 'method_not_allowed' });
 
   const ip = getClientIp(req);
@@ -230,7 +267,7 @@ async function handler(req, res) {
   const ghlBaseUrl = process.env.GHL_BASE_URL || 'https://services.leadconnectorhq.com';
   if (!pitToken || !locationId) return json(res, 500, { error: 'server_not_configured' });
 
-  const payload = validatePayload(req.body || {});
+  const payload = validatePayload(parseBody(req));
   if (!payload) return json(res, 400, { error: 'invalid_payload' });
 
   console.log('[quiz] received', {

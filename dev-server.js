@@ -105,6 +105,7 @@ const server = http.createServer(async (req, res) => {
   console.log(`[${stamp}] ${req.method} ${req.url}`);
 
   if (urlPath === '/api/quiz') {
+    if (req.method === 'OPTIONS') return handler(req, res);
     if (req.method !== 'POST') {
       res.statusCode = 405;
       res.setHeader('Content-Type', 'application/json');
