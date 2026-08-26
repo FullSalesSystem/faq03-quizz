@@ -25,12 +25,19 @@
 
     fbq('init', '288404690470754');
 
+    // eventID = ?sid= (submission_id do form do playbook). O playbook-api manda
+    // estes mesmos eventos pela Conversions API com esse id e a Meta deduplica
+    // navegador x servidor (e revisitas desta pagina, dentro de 48h).
+    var sid = '';
+    try { sid = new URLSearchParams(location.search).get('sid') || ''; } catch (e) {}
+    function px(metodo, nome) { sid ? fbq(metodo, nome, {}, { eventID: sid }) : fbq(metodo, nome); }
+
     // Evento padrão Meta (Lead oficial)
-    fbq('track', 'Lead');
+    px('track', 'Lead');
 
     // Eventos customizados
-    fbq('trackCustom', 'Lead_qualificado_geral');  // Lead geral
-    fbq('trackCustom', 'Lead_qualificado_FAQ_03'); // Lead qualificado
+    px('trackCustom', 'Lead_qualificado_geral');  // Lead geral
+    px('trackCustom', 'Lead_qualificado_FAQ_03'); // Lead qualificado
   </script>
   <noscript>
     <img height="1" width="1" style="display:none"
