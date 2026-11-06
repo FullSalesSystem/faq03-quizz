@@ -208,7 +208,8 @@ async function searchContactByEmail(ghlBaseUrl, pitToken, locationId, email) {
   const contacts = (data && (data.contacts || data.contact)) || [];
   const list = Array.isArray(contacts) ? contacts : [contacts];
   const match = list.find((c) => c && typeof c.email === 'string' && c.email.toLowerCase() === email);
-  return (match && match.id) || (list[0] && list[0].id) || null;
+  /* So match exato: a busca do GHL e fuzzy e list[0] pode ser outro contato. */
+  return (match && match.id) || null;
 }
 
 async function searchContactByPhone(ghlBaseUrl, pitToken, locationId, phone) {
@@ -229,7 +230,33 @@ async function searchContactByPhone(ghlBaseUrl, pitToken, locationId, phone) {
   const data = await response.json().catch(() => null);
   const contacts = (data && (data.contacts || data.contact)) || [];
   const list = Array.isArray(contacts) ? contacts : [contacts];
-  return (list[0] && list[0].id) || null;
+  const digits = String(phone).replace(/\D/g, '');
+  const match = list.find((c) => c && String(c.phone || '').replace(/\D/g, '') === digits);
+  return (match && match.id) || null;
+}
+
+/* Espera pelo contato/nota da LP (ver handler). Soma < maxDuration (vercel.json). */
+const POLL_MS = 3000;
+const CONTACT_WAIT_MS = 40000;
+const LP_NOTE_WAIT_MS = 9000;
+const LP_NOTE_TITLE = 'Respostas Playbook FSS';
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function hasLpNote(ghlBaseUrl, pitToken, contactId) {
+  try {
+    const endpoint = `${ghlBaseUrl.replace(/\/+$/, '')}/contacts/${contactId}/notes`;
+    const response = await fetch(endpoint, {
+      headers: { Authorization: `Bearer ${pitToken}`, Accept: 'application/json', Version: '2021-07-28' },
+    });
+    if (!response.ok) return true; // nao trava o quiz por falha de leitura
+    const data = await response.json().catch(() => null);
+    return (data?.notes || []).some((n) => String(n.body || '').startsWith(LP_NOTE_TITLE));
+  } catch (err) {
+    return true;
+  }
 }
 
 async function addContactNote(ghlBaseUrl, pitToken, contactId, body) {
@@ -277,25 +304,45 @@ async function handler(req, res) {
     classification: payload.classification,
   });
 
+  /* O contato e criado no GHL pelo servico de CRM ~30 s depois do form da
+     LP. Quem responde o quiz rapido chega aqui antes disso: em vez de 404,
+     tenta de novo ate CONTACT_WAIT_MS. */
+  const startedAt = Date.now();
   let contactId = null;
-  try {
-    if (payload.email) {
-      contactId = await searchContactByEmail(ghlBaseUrl, pitToken, locationId, payload.email);
+  let lastError = null;
+  while (!contactId) {
+    try {
+      if (payload.email) {
+        contactId = await searchContactByEmail(ghlBaseUrl, pitToken, locationId, payload.email);
+      }
+      if (!contactId && payload.whatsapp) {
+        contactId = await searchContactByPhone(ghlBaseUrl, pitToken, locationId, payload.whatsapp);
+      }
+      lastError = null;
+    } catch (err) {
+      lastError = err;
+      console.error('[ghl] search threw', { message: err && err.message });
     }
-    if (!contactId && payload.whatsapp) {
-      contactId = await searchContactByPhone(ghlBaseUrl, pitToken, locationId, payload.whatsapp);
-    }
-  } catch (err) {
-    console.error('[ghl] search threw', { message: err && err.message });
-    return json(res, 502, { error: 'upstream_unreachable' });
+    if (contactId || Date.now() - startedAt + POLL_MS > CONTACT_WAIT_MS) break;
+    await sleep(POLL_MS);
   }
 
   if (!contactId) {
+    if (lastError) return json(res, 502, { error: 'upstream_unreachable' });
     console.warn('[quiz] contact not found', {
       email: payload.email,
       whatsapp: payload.whatsapp,
+      waited_ms: Date.now() - startedAt,
     });
     return json(res, 404, { error: 'contact_not_found' });
+  }
+
+  /* Ordem das notas: a 1a e a da LP (playbook-api grava assim que o contato
+     aparece). Espera ela por ate LP_NOTE_WAIT_MS; se nao vier, segue. */
+  const noteWaitStart = Date.now();
+  while (Date.now() - noteWaitStart < LP_NOTE_WAIT_MS) {
+    if (await hasLpNote(ghlBaseUrl, pitToken, contactId)) break;
+    await sleep(POLL_MS);
   }
 
   const noteBody = buildNoteBody(payload);
