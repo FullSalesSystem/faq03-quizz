@@ -88,7 +88,10 @@
     return 'sid_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10);
   }
 
-  var REDIRECT_URL = 'https://playbook-calendly.fullsalessystem.com/';
+  /* localhost: dev-server do faq03-calendly na porta 3001 */
+  var REDIRECT_URL = /^(localhost|127\.0\.0\.1)$/.test(location.hostname)
+    ? 'http://localhost:3001/'
+    : 'https://playbook-calendly.fullsalessystem.com/';
 
   /* Repassa o lead pro calendario GHL (form_embed.js leva a query pro iframe).
      Sem isso o e-mail oculto do form ia vazio e o lead redigitava o telefone:
@@ -148,22 +151,29 @@
       q5: q5El ? q5El.value : ''
     };
 
-    function go() { window.location.href = calendarUrl(); }
+    /* Fire-and-forget com keepalive (sobrevive ao redirect). A API pode
+       segurar a resposta ate ~50 s esperando o contato aparecer no GHL
+       (lead que responde o quiz antes do CRM criar o contato), entao o
+       redirect NAO espera a resposta. 300 ms cobre o GTM. */
+    try {
+      fetch('/api/quiz', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        keepalive: true
+      }).then(function (res) {
+        if (!res.ok) console.warn('[quiz] api returned', res.status);
+      }).catch(function (err) {
+        console.warn('[quiz] api error', err);
+      });
+    } catch (e) {
+      console.warn('[quiz] fetch unavailable', e);
+    }
+    btnSubmit.textContent = 'Enviado ✓';
 
-    fetch('/api/quiz', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-      keepalive: true
-    }).then(function (res) {
-      if (!res.ok) console.warn('[quiz] api returned', res.status);
-      btnSubmit.textContent = 'Enviado ✓';
-    }).catch(function (err) {
-      console.warn('[quiz] api error', err);
-      btnSubmit.textContent = 'Enviado ✓';
-    }).finally(function () {
-      setTimeout(go, 250);
-    });
+    setTimeout(function () {
+      window.location.href = calendarUrl();
+    }, 300);
   }
 
   btnSubmit.addEventListener('click', submitQuiz);

@@ -33,8 +33,6 @@ function loadEnvFile(filePath) {
 
 loadEnvFile(path.join(__dirname, '.env.local'));
 
-const handler = require('./api/quiz.js');
-
 const PORT = Number(process.env.PORT || 3000);
 const ROOT = __dirname;
 
@@ -104,16 +102,23 @@ const server = http.createServer(async (req, res) => {
   const stamp = new Date().toISOString();
   console.log(`[${stamp}] ${req.method} ${req.url}`);
 
-  if (urlPath === '/api/quiz') {
+  const apiMatch = urlPath.match(/^\/api\/([a-z0-9-]+)$/);
+  if (apiMatch && fs.existsSync(path.join(ROOT, 'api', `${apiMatch[1]}.js`))) {
+    const handler = require(`./api/${apiMatch[1]}.js`);
     if (req.method === 'OPTIONS') return handler(req, res);
     if (req.method !== 'POST') {
       res.statusCode = 405;
       res.setHeader('Content-Type', 'application/json');
       return res.end(JSON.stringify({ error: 'method_not_allowed' }));
     }
+    /* Igual a Vercel: JSON vira objeto, text/plain (sendBeacon) fica string. */
     const raw = await readBody(req);
-    try { req.body = raw ? JSON.parse(raw) : {}; }
-    catch { req.body = {}; }
+    if (/application\/json/.test(req.headers['content-type'] || '')) {
+      try { req.body = raw ? JSON.parse(raw) : {}; }
+      catch { req.body = {}; }
+    } else {
+      req.body = raw;
+    }
     return handler(req, res);
   }
 
@@ -122,6 +127,6 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(PORT, () => {
   console.log(`\nDev server pronto: http://localhost:${PORT}`);
-  console.log(`API:                http://localhost:${PORT}/api/quiz`);
+  console.log(`APIs:               http://localhost:${PORT}/api/quiz, /api/agendamento`);
   console.log(`Env GHL configured: ${Boolean(process.env.GHL_PIT_TOKEN && process.env.GHL_LOCATION_ID)}\n`);
 });
