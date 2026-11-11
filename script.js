@@ -104,6 +104,8 @@
     var nome = getQueryParam('name').trim().replace(/\s+/g, ' ');
     /* whatsapp vem do playbook so com digitos: BR sem DDI (10/11), internacional com DDI */
     var digits = getQueryParam('whatsapp').replace(/\D+/g, '');
+    /* sid = submission_id da captura do Playbook: o seletor do CRM acha o lead por ele */
+    set('sid', getQueryParam('sid'));
     set('email', getQueryParam('email'));
     set('phone', digits ? '+' + (digits.length === 10 || digits.length === 11 ? '55' : '') + digits : '');
     set('full_name', nome);
