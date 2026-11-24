@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>/* Meta Pixel no topo (24/11/2026): PageView sai antes do GTM. O stub deixa passar so o 1o PageView; o do GTM (template __cvt_5RM3Q, trackSingle) cai no filtro. Nao trocar window.fbq depois do fbevents. */!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){var a=arguments;if((a[0]==='track'&&a[1]==='PageView')||(a[0]==='trackSingle'&&a[2]==='PageView')){if(n._pv)return;n._pv=1}n.callMethod?n.callMethod.apply(n,a):n.queue.push(a)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','288404690470754');fbq('track','PageView');</script>
 
   <!-- Google Tag Manager -->
   <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -14,17 +15,7 @@
 
   <!-- Meta Pixel Code -->
   <script>
-    !function(f,b,e,v,n,t,s)
-    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-    n.queue=[];t=b.createElement(e);t.async=!0;
-    t.src=v;s=b.getElementsByTagName(e)[0];
-    s.parentNode.insertBefore(t,s)}(window, document,'script',
-    'https://connect.facebook.net/en_US/fbevents.js');
-
-    fbq('init', '288404690470754');
-
+    // código-base + init + PageView: no 1o <script> do <head>
     // eventID = ?sid= (submission_id do form do playbook). O playbook-api manda
     // estes mesmos eventos pela Conversions API com esse id e a Meta deduplica
     // navegador x servidor (e revisitas desta pagina, dentro de 48h).
