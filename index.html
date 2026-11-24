@@ -26,9 +26,16 @@
     // Evento padrão Meta (Lead oficial)
     px('track', 'Lead');
 
-    // Eventos customizados
-    px('trackCustom', 'Lead_qualificado_geral');  // Lead geral
-    px('trackCustom', 'Lead_qualificado_FAQ_03'); // Lead qualificado
+    // Régua de marketing (24/11/2026): sócio 40-50k chega aqui igual ao qualificado
+    // (mesmo atendimento), mas não é MQL. O form do Playbook manda ?oportunidade=1.
+    var oportunidade = false;
+    try { oportunidade = new URLSearchParams(location.search).get('oportunidade') === '1'; } catch (e) {}
+    if (oportunidade) {
+      px('trackCustom', 'Lead_oportunidade_comercial');
+    } else {
+      px('trackCustom', 'Lead_qualificado_geral');  // Lead geral
+      px('trackCustom', 'Lead_qualificado_FAQ_03'); // Lead qualificado
+    }
   </script>
   <noscript>
     <img height="1" width="1" style="display:none"
